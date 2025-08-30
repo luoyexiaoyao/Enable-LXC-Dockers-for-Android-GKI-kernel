@@ -216,7 +216,7 @@ jobs:
           echo '补丁加入构建'
           echo "obj-y += hmbird_patch.o" >> Makefile
           tail -n 3 Makefile
-      - name: 使GKI在一加8E平台正常使用
+      - name: LXC&Docker配置
         if: ${{ inputs.use_lxc }}
         run: |
           set -x
@@ -248,7 +248,6 @@ jobs:
           echo '切换到驱动目录'
           cd "$CONFIG/common/drivers/"
           echo '当前目录$(pwd),下载支持补丁'
-          curl -LSs "
       
       - name: 确定 KernelSU 的分支
         run: |
