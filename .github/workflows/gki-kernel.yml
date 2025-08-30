@@ -45,6 +45,10 @@ on:
         required: true
         type: boolean
         default: true
+      use_lxc:
+        required: true
+        type: boolean
+        default: false
       supp_op:
         required: true
         type: boolean
@@ -212,6 +216,39 @@ jobs:
           echo '补丁加入构建'
           echo "obj-y += hmbird_patch.o" >> Makefile
           tail -n 3 Makefile
+      - name: 使GKI在一加8E平台正常使用
+        if: ${{ inputs.use_lxc }}
+        run: |
+          set -x
+          set -e
+          echo "写入LZ4KD&ZSTDN config依赖"
+          CONFIG_FILE="$CONFIG/common/arch/arm64/configs/gki_defconfig"
+
+          echo "CONFIG_SYSVIPC=y" >> "$CONFIG_FILE"
+          echo "CONFIG_POSIX_MQUEUE=y" >> "$CONFIG_FILE"
+          echo "CONFIG_CGROUP_DEVICE=y" >> "$CONFIG_FILE"
+          echo "CONFIG_USER_NS=y" >> "$CONFIG_FILE"
+          echo "CONFIG_NETFILTER_XT_TARGET_CHECKSUM=y" >> "$CONFIG_FILE"
+          echo "CONFIG_NETFILTER_XT_MATCH_ADDRTYPE=y" >> "$CONFIG_FILE"
+          echo "CONFIG_IP6_NF_NAT=y" >> "$CONFIG_FILE"
+          echo "CONFIG_IP6_NF_TARGET_MASQUERADE=y" >> "$CONFIG_FILE"
+          echo "CONFIG_RFKILL=y" >> "$CONFIG_FILE"
+          echo "CONFIG_DEVTMPFS=y" >> "$CONFIG_FILE"
+          echo "CONFIG_NULL_TTY=y" >> "$CONFIG_FILE"
+          echo "CONFIG_LTO_CLANG_THIN=y" >> "$CONFIG_FILE"
+          echo "CONFIG_UTS_NS=y" >> "$CONFIG_FILE"
+          echo "CONFIG_PID_NS=y" >> "$CONFIG_FILE"
+          echo "CONFIG_IPC_NS=y" >> "$CONFIG_FILE"
+          echo "CONFIG_NET_NS=y" >> "$CONFIG_FILE"
+          echo "CONFIG_CGROUP_FREEZER=y" >> "$CONFIG_FILE"
+          sed -i '/CONFIG_LTO_CLANG_FULL=y/d' "$CONFIG_FILE"
+          sed -i '/CONFIG_MODULE_SCMVERSION=y/d' "$CONFIG_FILE"
+
+          
+          echo '切换到驱动目录'
+          cd "$CONFIG/common/drivers/"
+          echo '当前目录$(pwd),下载支持补丁'
+          curl -LSs "
       
       - name: 确定 KernelSU 的分支
         run: |
